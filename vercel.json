@@ -1,0 +1,20 @@
+{
+  "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/cron/youtube-import",
+      "schedule": "0 10 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ]
+}
