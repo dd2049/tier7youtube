@@ -9,6 +9,9 @@ export function AdminDashboard() {
   const [query, setQuery] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
   const [busyId, setBusyId] = useState("");
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualUrl, setManualUrl] = useState("");
+  const [manualLocked, setManualLocked] = useState(true);
 
   async function loadVideos() {
     const response = await fetch("/api/admin/videos", { cache: "no-store" });
@@ -91,6 +94,33 @@ export function AdminDashboard() {
     setStatus(`Import complete. ${data.added} new videos added as locked.`);
   }
 
+  async function addManualVideo(event) {
+    event.preventDefault();
+    setStatus("Adding video...");
+
+    const response = await fetch("/api/admin/videos", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: manualTitle,
+        url: manualUrl,
+        locked: manualLocked
+      })
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      setStatus(data.error || "Could not add that video.");
+      return;
+    }
+
+    setManualTitle("");
+    setManualUrl("");
+    setManualLocked(true);
+    await loadVideos();
+    setStatus(`Added "${data.video.title}" as ${data.video.locked ? "locked" : "live"}.`);
+  }
+
   return (
     <>
       <header className="site-header admin-header">
@@ -152,6 +182,45 @@ export function AdminDashboard() {
             </div>
 
             <p className="status-note">{status}</p>
+
+            <form className="manual-add-panel" onSubmit={addManualVideo}>
+              <div>
+                <p className="eyebrow">Manual upload</p>
+                <h2>Paste a YouTube link</h2>
+                <p className="subhead">No Google setup needed. Add the title, paste the unlisted video link, then choose whether students see it now.</p>
+              </div>
+              <div className="manual-add-fields">
+                <label className="field">
+                  <span>Video title</span>
+                  <input
+                    value={manualTitle}
+                    onChange={(event) => setManualTitle(event.target.value)}
+                    placeholder="Example: Market Structure Lesson 01"
+                    required
+                  />
+                </label>
+                <label className="field">
+                  <span>YouTube link</span>
+                  <input
+                    value={manualUrl}
+                    onChange={(event) => setManualUrl(event.target.value)}
+                    placeholder="https://youtu.be/..."
+                    required
+                  />
+                </label>
+              </div>
+              <div className="admin-actions">
+                <label className="lock-choice">
+                  <input
+                    checked={manualLocked}
+                    onChange={(event) => setManualLocked(event.target.checked)}
+                    type="checkbox"
+                  />
+                  <span>Add as locked</span>
+                </label>
+                <button className="primary-button" type="submit">Add video</button>
+              </div>
+            </form>
 
             <div className="admin-grid">
               {filteredVideos.map((video) => (

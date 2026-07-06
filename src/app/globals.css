@@ -54,6 +54,12 @@ input {
   font: inherit;
 }
 
+input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--gold);
+}
+
 .site-header {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr) auto;
@@ -412,6 +418,42 @@ h2 {
   margin-top: 18px;
 }
 
+.manual-add-panel {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(215, 180, 92, 0.08), transparent 38%),
+    #0a0a0a;
+}
+
+.manual-add-panel h2 {
+  min-height: 0;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+}
+
+.manual-add-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+}
+
+.lock-choice {
+  min-height: 44px;
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
 .admin-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -466,6 +508,7 @@ h2 {
 @media (max-width: 720px) {
   .site-header,
   .toolbar,
+  .manual-add-fields,
   .admin-row,
   .section-heading {
     grid-template-columns: 1fr;

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth";
-import { listAdminVideos, setVideoLock } from "@/lib/video-store";
+import { addManualVideo, listAdminVideos, setVideoLock } from "@/lib/video-store";
 
 export const dynamic = "force-dynamic";
 
@@ -27,4 +27,23 @@ export async function PATCH(request) {
   }
 
   return Response.json({ ok: true, state: updated });
+}
+
+export async function POST(request) {
+  if (!(await requireAdmin())) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const result = await addManualVideo({
+    title: body.title,
+    url: body.url,
+    locked: body.locked !== false
+  });
+
+  if (result.error) {
+    return Response.json({ error: result.error }, { status: 400 });
+  }
+
+  return Response.json(result);
 }

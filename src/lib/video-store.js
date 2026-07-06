@@ -23,6 +23,36 @@ function normalizeVideo(video, index) {
   };
 }
 
+export function extractYouTubeVideoId(urlOrId) {
+  const value = String(urlOrId || "").trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
+    return value;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.hostname === "youtu.be") {
+      const id = url.pathname.split("/").filter(Boolean)[0];
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+
+    if (url.hostname.endsWith("youtube.com")) {
+      const watchId = url.searchParams.get("v");
+      if (/^[a-zA-Z0-9_-]{11}$/.test(watchId || "")) {
+        return watchId;
+      }
+
+      const parts = url.pathname.split("/").filter(Boolean);
+      const videoId = parts.find((part) => /^[a-zA-Z0-9_-]{11}$/.test(part));
+      return videoId || null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 function normalizeState(state) {
   return {
     updatedAt: state?.updatedAt || new Date().toISOString(),
@@ -173,6 +203,47 @@ export async function mergeImportedVideos(importedVideos) {
 
   return {
     added,
+    totalCount: saved.videos.length,
+    videos: saved.videos
+  };
+}
+
+export async function addManualVideo({ title, url, locked = true }) {
+  const videoId = extractYouTubeVideoId(url);
+  const cleanTitle = String(title || "").trim();
+
+  if (!videoId) {
+    return { error: "Paste a valid YouTube video link or video ID." };
+  }
+
+  if (!cleanTitle) {
+    return { error: "Add a title for this video." };
+  }
+
+  const state = await readVideoState();
+  if (state.videos.some((video) => video.id === videoId)) {
+    return { error: "That video is already in the library." };
+  }
+
+  const minOrder = Math.min(...state.videos.map((video) => video.order), 1);
+  const manualVideo = normalizeVideo({
+    id: videoId,
+    title: cleanTitle,
+    url: `https://www.youtube.com/watch?v=${videoId}`,
+    order: minOrder - 1,
+    locked,
+    importedAt: new Date().toISOString(),
+    source: "manual"
+  });
+
+  const saved = await saveVideoState({
+    ...state,
+    videos: [manualVideo, ...state.videos].sort((a, b) => a.order - b.order)
+  });
+
+  return {
+    added: 1,
+    video: manualVideo,
     totalCount: saved.videos.length,
     videos: saved.videos
   };

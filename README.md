@@ -7,6 +7,7 @@ Next.js/Vercel app for student access to unlisted YouTube lessons.
 - Public student library only receives unlocked videos.
 - `/admin` is password protected with an HTTP-only session cookie.
 - Admin can lock/unlock videos.
+- Admin can manually add YouTube videos by pasting a title and link.
 - New YouTube imports are added as locked by default.
 - Daily Vercel Cron endpoint can import new uploads after YouTube OAuth is configured.
 - Vercel Blob stores the live video state when `BLOB_READ_WRITE_TOKEN` is configured.
@@ -31,9 +32,13 @@ CRON_SECRET=another-long-random-string
 BLOB_READ_WRITE_TOKEN=from-vercel-blob
 ```
 
-## YouTube auto-import env vars
+## Manual video adds
 
-These are required for importing owner-visible/unlisted uploads:
+Manual adds do not need Google OAuth. Sign in at `/admin`, paste the video title and YouTube link, then choose whether to add it locked or live.
+
+## Optional YouTube auto-import env vars
+
+These are only required if you want the `Import uploads` button or cron job to automatically pull owner-visible/unlisted uploads:
 
 ```bash
 YOUTUBE_CLIENT_ID=
